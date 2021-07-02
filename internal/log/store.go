@@ -86,7 +86,6 @@ func (s *store) ReadAt(p []byte, off int64) (int, error) {
 	}
 	return s.File.ReadAt(p, off)
 }
-
 // END: rawreadat
 
 // START: close
@@ -99,5 +98,4 @@ func (s *store) Close() error {
 	}
 	return s.File.Close()
 }
-
 // END: close

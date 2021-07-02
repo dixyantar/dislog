@@ -38,7 +38,7 @@ func TestLog(t *testing.T) {
 
 // END: intro
 
-// START: append_read
+// START: tests
 func testAppendRead(t *testing.T, log *Log) {
 	append := &api.Record{
 		Value: []byte("hello world"),
@@ -50,20 +50,19 @@ func testAppendRead(t *testing.T, log *Log) {
 	read, err := log.Read(off)
 	require.NoError(t, err)
 	require.Equal(t, append.Value, read.Value)
+
 }
 
-// END: append_read
-
-// START: out_of_range
+// START: test
 func testOutOfRangeErr(t *testing.T, log *Log) {
 	read, err := log.Read(1)
 	require.Nil(t, read)
-	require.Error(t, err)
+	apiErr := err.(api.ErrOffsetOutOfRange)
+	require.Equal(t, uint64(1), apiErr.Offset)
 }
 
-// END: out_of_range
+// END: test
 
-// START: init_existing
 func testInitExisting(t *testing.T, o *Log) {
 	append := &api.Record{
 		Value: []byte("hello world"),
@@ -92,9 +91,6 @@ func testInitExisting(t *testing.T, o *Log) {
 	require.Equal(t, uint64(2), off)
 }
 
-// END: init_existing
-
-// START: reader
 func testReader(t *testing.T, log *Log) {
 	append := &api.Record{
 		Value: []byte("hello world"),
@@ -113,9 +109,6 @@ func testReader(t *testing.T, log *Log) {
 	require.Equal(t, append.Value, read.Value)
 }
 
-// END: reader
-
-// START: truncate
 func testTruncate(t *testing.T, log *Log) {
 	append := &api.Record{
 		Value: []byte("hello world"),
@@ -132,4 +125,4 @@ func testTruncate(t *testing.T, log *Log) {
 	require.Error(t, err)
 }
 
-// END: truncate
+// END: tests

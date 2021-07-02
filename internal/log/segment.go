@@ -1,3 +1,4 @@
+// START: intro
 package log
 
 import (
@@ -15,6 +16,8 @@ type segment struct {
 	baseOffset, nextOffset uint64
 	config                 Config
 }
+
+// END: intro
 
 // START: newsegment
 func newSegment(dir string, baseOffset uint64, c Config) (*segment, error) {
@@ -136,11 +139,9 @@ func (s *segment) Remove() error {
 
 // START: nearestmultiple
 func nearestMultiple(j, k uint64) uint64 {
-	//returns 8 if j = 9 and k =4
 	if j >= 0 {
 		return (j / k) * k
 	}
-	//negative
 	return ((j - k + 1) / k) * k
 
 }

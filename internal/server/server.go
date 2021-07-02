@@ -1,33 +1,107 @@
 // START: types
 package server
 
+// START: imports
 import (
 	"context"
+	"time"
 
 	api "github.com/dixyantar/dislog/api/v1"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
+
+	// START_HIGHLIGHT
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
+	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/stats/view"
+	"go.opencensus.io/trace"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+
+	// END_HIGHLIGHT
+
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/peer"
+	"google.golang.org/grpc/status"
 )
 
+// END: imports
+
 type Config struct {
-	CommitLog CommitLog
+	CommitLog  CommitLog
+	Authorizer Authorizer
 }
+
+const (
+	objectWildcard = "*"
+	produceAction  = "produce"
+	consumeAction  = "consume"
+)
+
+// END: config_authorizer
 
 type grpcServer struct {
 	*Config
 }
 
-func newgrpcServer(config *Config) (srv *grpcServer, err error) {
-	srv = &grpcServer{
+func newgrpcServer(config *Config) (*grpcServer, error) {
+	srv := &grpcServer{
 		Config: config,
 	}
 	return srv, nil
 }
 
-// END: types
+// START: logger
+func NewGRPCServer(config *Config, grpcOpts ...grpc.ServerOption) (
+	*grpc.Server,
+	error,
+) {
+	logger := zap.L().Named("server")
+	zapOpts := []grpc_zap.Option{
+		grpc_zap.WithDurationField(
+			func(duration time.Duration) zapcore.Field {
+				return zap.Int64(
+					"grpc.time_ns",
+					duration.Nanoseconds(),
+				)
+			},
+		),
+	}
+	// END: logger
 
-// START: newapi
-func NewGRPCServer(config *Config) (*grpc.Server, error) {
-	gsrv := grpc.NewServer()
+	// START: metrics_traces
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+	err := view.Register(ocgrpc.DefaultServerViews...)
+	if err != nil {
+		return nil, err
+	}
+	// END: metrics_traces
+
+	// START: grpc_opts
+	grpcOpts = append(grpcOpts,
+		grpc.StreamInterceptor(
+			grpc_middleware.ChainStreamServer(
+				// START_HIGHLIGHT
+				grpc_ctxtags.StreamServerInterceptor(),
+				grpc_zap.StreamServerInterceptor(logger, zapOpts...),
+				// END_HIGHLIGHT
+				grpc_auth.StreamServerInterceptor(authenticate),
+			)), grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			// START_HIGHLIGHT
+			grpc_ctxtags.UnaryServerInterceptor(),
+			grpc_zap.UnaryServerInterceptor(logger, zapOpts...),
+			// END_HIGHLIGHT
+			grpc_auth.UnaryServerInterceptor(authenticate),
+		)),
+		// START_HIGHLIGHT
+		grpc.StatsHandler(&ocgrpc.ServerHandler{}),
+		// END_HIGHLIGHT
+	)
+	// END: grpc_opts
+	gsrv := grpc.NewServer(grpcOpts...)
 	srv, err := newgrpcServer(config)
 	if err != nil {
 		return nil, err
@@ -41,11 +115,19 @@ func NewGRPCServer(config *Config) (*grpc.Server, error) {
 	return gsrv, nil
 }
 
-// END: newapi
-
 // START: request_response
+// START: produce_authorize
 func (s *grpcServer) Produce(ctx context.Context, req *api.ProduceRequest) (
 	*api.ProduceResponse, error) {
+	// START_HIGHLIGHT
+	if err := s.Authorizer.Authorize(
+		subject(ctx),
+		objectWildcard,
+		produceAction,
+	); err != nil {
+		return nil, err
+	}
+	// END_HIGHLIGHT
 	offset, err := s.CommitLog.Append(req.Record)
 	if err != nil {
 		return nil, err
@@ -53,8 +135,20 @@ func (s *grpcServer) Produce(ctx context.Context, req *api.ProduceRequest) (
 	return &api.ProduceResponse{Offset: offset}, nil
 }
 
+// END: produce_authorize
+
+// START: consume_authorize
 func (s *grpcServer) Consume(ctx context.Context, req *api.ConsumeRequest) (
 	*api.ConsumeResponse, error) {
+	// START_HIGHLIGHT
+	if err := s.Authorizer.Authorize(
+		subject(ctx),
+		objectWildcard,
+		consumeAction,
+	); err != nil {
+		return nil, err
+	}
+	// END_HIGHLIGHT
 	record, err := s.CommitLog.Read(req.Offset)
 	if err != nil {
 		return nil, err
@@ -62,12 +156,11 @@ func (s *grpcServer) Consume(ctx context.Context, req *api.ConsumeRequest) (
 	return &api.ConsumeResponse{Record: record}, nil
 }
 
+// END: consume_authorize
 // END: request_response
 
 // START: stream
-func (s *grpcServer) ProduceStream(
-	stream api.Log_ProduceStreamServer,
-) error {
+func (s *grpcServer) ProduceStream(stream api.Log_ProduceStreamServer) error {
 	for {
 		req, err := stream.Recv()
 		if err != nil {
@@ -82,8 +175,6 @@ func (s *grpcServer) ProduceStream(
 		}
 	}
 }
-
-// START: consume_stream
 
 func (s *grpcServer) ConsumeStream(
 	req *api.ConsumeRequest,
@@ -110,7 +201,6 @@ func (s *grpcServer) ConsumeStream(
 	}
 }
 
-// END: consume_stream
 // END: stream
 
 // START: commitlog
@@ -120,3 +210,42 @@ type CommitLog interface {
 }
 
 // END: commitlog
+
+// START: authorizer
+type Authorizer interface {
+	Authorize(subject, object, action string) error
+}
+
+// END: authorizer
+
+// START: authenticate
+func authenticate(ctx context.Context) (context.Context, error) {
+	peer, ok := peer.FromContext(ctx)
+	if !ok {
+		return ctx, status.New(
+			codes.Unknown,
+			"couldn't find peer info",
+		).Err()
+	}
+
+	if peer.AuthInfo == nil {
+		return ctx, status.New(
+			codes.Unauthenticated,
+			"no transport security being used",
+		).Err()
+	}
+
+	tlsInfo := peer.AuthInfo.(credentials.TLSInfo)
+	subject := tlsInfo.State.VerifiedChains[0][0].Subject.CommonName
+	ctx = context.WithValue(ctx, subjectContextKey{}, subject)
+
+	return ctx, nil
+}
+
+func subject(ctx context.Context) string {
+	return ctx.Value(subjectContextKey{}).(string)
+}
+
+type subjectContextKey struct{}
+
+// END: authenticate

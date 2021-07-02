@@ -1,13 +1,26 @@
 module github.com/dixyantar/dislog
 
-go 1.13
-
 require (
-	github.com/golang/protobuf v1.5.3
-	github.com/stretchr/testify v1.8.1
+	contrib.go.opencensus.io/exporter/prometheus v0.2.0 // indirect
+	github.com/casbin/casbin v1.9.1
+	github.com/cloudflare/cfssl v1.4.1 // indirect
+	github.com/davecgh/go-spew v1.1.1
+	github.com/go-sql-driver/mysql v1.5.0 // indirect
+	github.com/golang/protobuf v1.4.1
+	github.com/google/certificate-transparency-go v1.1.0 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
+	github.com/jmoiron/sqlx v1.2.0 // indirect
+	github.com/lib/pq v1.3.0 // indirect
+	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
+	github.com/stretchr/testify v1.4.0
+	github.com/travisjeffery/go-dynaport v0.0.0-20171218080632-f8768fb615d5 // indirect
 	github.com/tysontate/gommap v0.0.0-20190103205956-899e1273fb5c
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230530153820-e85fd2cbaebc
-	google.golang.org/grpc v1.54.0
-	google.golang.org/protobuf v1.30.0
-	launchpad.net/gocheck v0.0.0-20140225173054-000000000087 // indirect
+	go.opencensus.io v0.22.2
+	go.uber.org/zap v1.10.0
+	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 // indirect
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
+	google.golang.org/grpc v1.32.0
+	google.golang.org/protobuf v1.25.0
 )
+
+go 1.13

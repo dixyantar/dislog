@@ -1,4 +1,3 @@
-// START: func
 package config
 
 import (
@@ -7,6 +6,14 @@ import (
 	"fmt"
 	"io/ioutil"
 )
+
+type TLSConfig struct {
+	CertFile      string
+	KeyFile       string
+	CAFile        string
+	ServerAddress string
+	Server        bool
+}
 
 func SetupTLSConfig(cfg TLSConfig) (*tls.Config, error) {
 	var err error
@@ -44,16 +51,3 @@ func SetupTLSConfig(cfg TLSConfig) (*tls.Config, error) {
 	}
 	return tlsConfig, nil
 }
-
-// END: func
-
-// START: type
-type TLSConfig struct {
-	CertFile      string
-	KeyFile       string
-	CAFile        string
-	ServerAddress string
-	Server        bool
-}
-
-// END: type

@@ -15,8 +15,6 @@ var (
 	NobodyClientKeyFile  = configFile("nobody-client-key.pem")
 	ACLModelFile         = configFile("model.conf")
 	ACLPolicyFile        = configFile("policy.csv")
-	TracesLogFile        = configFile("traces.log")
-	MetricsLogFile       = configFile("metrics.log")
 )
 
 func configFile(filename string) string {

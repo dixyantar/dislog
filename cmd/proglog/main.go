@@ -19,7 +19,7 @@ func main() {
 
 	// START_HIGHLIGHT
 	cmd := &cobra.Command{
-		Use:     "proglog",
+		Use:     "dislog",
 		PreRunE: cli.setupConfig,
 		RunE:    cli.run,
 	}
@@ -60,7 +60,7 @@ func setupFlags(cmd *cobra.Command) error {
 
 	cmd.Flags().String("config-file", "", "Path to config file.")
 
-	dataDir := path.Join(os.TempDir(), "proglog")
+	dataDir := path.Join(os.TempDir(), "dislog")
 	cmd.Flags().String("data-dir",
 		dataDir,
 		"Directory to store log and Raft data.")

@@ -53,7 +53,7 @@ func (r *Resolver) Build(
 	return r, nil
 }
 
-const Name = "proglog"
+const Name = "dislog"
 
 func (r *Resolver) Scheme() string {
 	return Name

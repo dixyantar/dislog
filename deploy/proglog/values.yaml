@@ -1,4 +1,4 @@
-# Default values for proglog.
+# Default values for dislog.
 image:
   repository: github.com/dixyantar/dislog
   tag: 0.0.1

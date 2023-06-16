@@ -45,3 +45,13 @@ Segments are used to keep logs rolling so that older segments can be deleted whe
 - [Deployment](https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/)
 
 
+## TODO
+
+- [ ] Elaborate Readme
+- [ ] GKE config
+- [ ] FQDN
+- [ ] Deploy to cloud
+- [ ] Handle ungraceful shutdowns
+
+
+

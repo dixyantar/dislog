@@ -1,9 +1,9 @@
 # START: probes
 # START: beginning
-FROM golang:1.14-alpine AS build
-WORKDIR /go/src/proglog
+FROM golang:1.20-alpine AS build
+WORKDIR /go/src/dislog
 COPY . .
-RUN CGO_ENABLED=0 go build -o /go/bin/proglog ./cmd/proglog
+RUN CGO_ENABLED=0 go build -o /go/bin/dislog ./cmd/dislog
 # END: beginning
 # START_HIGHLIGHT
 RUN GRPC_HEALTH_PROBE_VERSION=v0.3.2 && \
@@ -15,12 +15,12 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.3.2 && \
 # START: beginning
 
 FROM scratch
-COPY --from=build /go/bin/proglog /bin/proglog
+COPY --from=build /go/bin/dislog /bin/dislog
 # END: beginning
 # START_HIGHLIGHT
 COPY --from=build /go/bin/grpc_health_probe /bin/grpc_health_probe
 # END_HIGHLIGHT
 # START: beginning
-ENTRYPOINT ["/bin/proglog"]
+ENTRYPOINT ["/bin/dislog"]
 # END: beginning
 # END: probes

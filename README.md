@@ -34,10 +34,12 @@ Segments are used to keep logs rolling so that older segments can be deleted whe
 - [Scaling Raft](https://www.cockroachlabs.com/blog/scaling-raft/)
 - [Why The Name - Raft?](https://groups.google.com/g/raft-dev/c/95rZqptGpmU)
 
-## gRPC Server 
+## Server & Load Balancing 
 
 - [gRPC](https://grpc.io/)
 - [Why gRPC?](https://grpc.io/docs/languages/go/basics/#why-use-grpc)
+- [gRPC Load Balancer](https://grpc.io/blog/grpc-load-balancing/)
+- [Picker](https://pkg.go.dev/google.golang.org/grpc/balancer#Picker)
 
 ## Kubernetes StatefulSets
 

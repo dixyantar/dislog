@@ -38,6 +38,10 @@ Segments are used to keep logs rolling so that older segments can be deleted whe
 
 ## Observability
 
+- [OpenCensus Tracing](https://github.com/casbin)
+- [OpenCensus Stats/Metric](https://opencensus.io/stats/)
+- [Uber Zap Logging](https://github.com/uber-go/zap)
+
 ## Service Discovery with Serf 
 
 - [Serf](https://www.serf.io/)
@@ -67,7 +71,6 @@ Segments are used to keep logs rolling so that older segments can be deleted whe
 
 - [Cobra](https://pkg.go.dev/github.com/spf13/cobra)
 - [Viper](https://pkg.go.dev/github.com/dvln/viper)
-- 
 
 
 ## TODO

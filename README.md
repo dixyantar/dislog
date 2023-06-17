@@ -18,10 +18,25 @@ The Log package consists of 5 parts:
 - Segment: _the abstraction that ties a store and an index together_
 - Log: _the abstraction that ties all the segments together_
 
-## Segmentation (Todo)
+## Segmentation 
 
 Segmentation is made possible by the [gommap](https://pkg.go.dev/github.com/tysonmote/gommap) package. All memory managed through this package is outside of Go's own memory management.
 Segments are used to keep logs rolling so that older segments can be deleted when approaching max file system memory.
+
+## Security
+
+### TLS Server/Client Authentication
+
+- [Cloudfare CFSSL](https://blog.cloudflare.com/introducing-cfssl/)
+- cfssl to sign, verify, and bundle TLS certificates and output the results as JSON.
+- cfssljson to take that JSON output and split them into separate key, certificate, CSR, and bundle files.
+- [Crypto/tls](https://pkg.go.dev/crypto/tls)
+
+### ACL Authorization
+
+- [Casbin](https://github.com/casbin)
+
+## Observability
 
 ## Service Discovery with Serf 
 
@@ -41,10 +56,18 @@ Segments are used to keep logs rolling so that older segments can be deleted whe
 - [gRPC Load Balancer](https://grpc.io/blog/grpc-load-balancing/)
 - [Picker](https://pkg.go.dev/google.golang.org/grpc/balancer#Picker)
 
-## Kubernetes StatefulSets
+## Deployment (Local)
 
 - [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
 - [Deployment](https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/)
+- [Helm Charts](https://helm.sh/docs/topics/charts/)
+- [Kind](https://kind.sigs.k8s.io/)
+
+## Agent CLI
+
+- [Cobra](https://pkg.go.dev/github.com/spf13/cobra)
+- [Viper](https://pkg.go.dev/github.com/dvln/viper)
+- 
 
 
 ## TODO

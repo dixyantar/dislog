@@ -2,7 +2,7 @@
 
  ___A mini Kafka; written in Go.___
 
-[Dislog](https://github.com/dixyantar/dislog) is a __distributed__, __stateful__, __observable__, __streaming__ ___logger___, that runs on a gRPC server deployed with Kubernetes, with self-managed __service discovery__ & __consensus__.
+[Dislog](https://github.com/dixyantar/dislog) is a __distributed__, __stateful__, __observable__, __streaming__ ___log___, that runs on a gRPC server deployed with Kubernetes, with self-managed __service discovery__ & __consensus__.
 
 ## Inspiration
 
@@ -72,6 +72,10 @@ Segments are used to keep logs rolling so that older segments can be deleted whe
 - [Cobra](https://pkg.go.dev/github.com/spf13/cobra)
 - [Viper](https://pkg.go.dev/github.com/dvln/viper)
 
+## Comparision with Kafka
+
+Calling [Dislog](https://github.com/dixyantar/dislog) a mini-[Kafka](https://kafka.apache.org/) is partially apt, as we do have segmentation, offsets and a bunch of other stuff that are characteristic of Kafka. However, we do not have partitioning or topics which make Kafka the go-to event streamer for production-grade systems. There is much scope for improvement in Dislog and hopefully, one day I will have the time and patience to do the research and write the code!
+
 
 ## TODO
 
@@ -80,6 +84,4 @@ Segments are used to keep logs rolling so that older segments can be deleted whe
 - [ ] FQDN
 - [ ] Deploy to cloud
 - [ ] Handle ungraceful shutdowns
-
-
 
